@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using NewsAgregator.API.Entities;
 using NewsAgregator.API.Models;
 using NewsAgregator.API.Services;
 
@@ -75,7 +77,7 @@ namespace NewsAgregator.API.Controllers
         }
 
         [HttpPut("{articleId}")]
-        public ActionResult UpdateArticleForUser(Guid userId,
+        public IActionResult UpdateArticleForUser(Guid userId,
             Guid articleId,
             ArticleForUpdateDto article)
         {
@@ -88,7 +90,17 @@ namespace NewsAgregator.API.Controllers
 
             if(articleForUserFromRepo == null)
             {
-                return NotFound();
+                var articleToAdd = _mapper.Map<Article>(article);
+                articleToAdd.Id = articleId;
+
+                _articleLibraryRepository.AddArticle(userId, articleToAdd);
+                _articleLibraryRepository.Save();
+
+                var articleToReturn = _mapper.Map<ArticleDto>(articleToAdd);
+
+                return CreatedAtRoute("GetArticleForUser",
+                    new {userId, articleId = articleToReturn.Id},
+                    articleToReturn);
             }
 
             //map the entity to a CourseForUpdateDto
@@ -98,6 +110,36 @@ namespace NewsAgregator.API.Controllers
 
             _articleLibraryRepository.UpdateArticle(articleForUserFromRepo);
             _articleLibraryRepository.Save();
+            return NoContent();
+        }
+
+        [HttpPatch("{articleId}")]
+        public IActionResult PartiallyUpdateArticleForUser(Guid userId,
+            Guid articleId,
+            JsonPatchDocument<ArticleForUpdateDto> patchDocument)
+        {
+            if (!_articleLibraryRepository.UserExists((userId)))
+            {
+                return NotFound();
+            }
+
+            var articleForUserFromRepo = _articleLibraryRepository.GetArticle(userId, articleId);
+
+            if (articleForUserFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var articleToPatch = _mapper.Map<ArticleForUpdateDto>(articleForUserFromRepo);
+            // add validation
+            patchDocument.ApplyTo(articleToPatch);
+
+            _mapper.Map(articleToPatch, articleForUserFromRepo);
+
+            _articleLibraryRepository.UpdateArticle(articleForUserFromRepo);
+
+            _articleLibraryRepository.Save();
+
             return NoContent();
         }
     }

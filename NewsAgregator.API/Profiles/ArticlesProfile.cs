@@ -13,6 +13,7 @@ namespace NewsAgregator.API.Profiles
             CreateMap<Entities.Article, Models.ArticleDto>();
             CreateMap<Models.ArticleForCreationDto, Entities.Article>();
             CreateMap<Models.ArticleForUpdateDto, Entities.Article>();
+            CreateMap<Entities.Article, Models.ArticleForUpdateDto>();
         }
     }
 }

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NewsAgregator.API.Services;
+using Newtonsoft.Json.Serialization;
 
 namespace CourseLibrary.API
 {
@@ -38,12 +39,17 @@ namespace CourseLibrary.API
                                         "http://www.contoso.com");
                 });
             });
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddControllers(setupAction =>
            {
                setupAction.ReturnHttpNotAcceptable = true;
-           }).AddXmlDataContractSerializerFormatters()
+           }).AddNewtonsoftJson(setupAction =>
+                {
+                    setupAction.SerializerSettings.ContractResolver =
+                        new CamelCasePropertyNamesContractResolver();
+                })
+                .AddXmlDataContractSerializerFormatters()
            .ConfigureApiBehaviorOptions(setupAction => {
                setupAction.InvalidModelStateResponseFactory = context =>
                {
