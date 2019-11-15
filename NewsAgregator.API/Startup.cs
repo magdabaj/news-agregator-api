@@ -75,6 +75,7 @@ namespace CourseLibrary.API
              
             services.AddScoped<ICourseLibraryRepository, CourseLibraryRepository>();
             services.AddScoped<IArticleLibraryRepository, ArticleLibraryRepository>();
+            services.AddScoped<ITagLibraryRepository, TagLibraryRepository>();
 
             services.AddDbContext<CourseLibraryContext>(options =>
             {

@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NewsAgregator.API.Entities;
 using NewsAgregator.API.Models;
 using NewsAgregator.API.Services;
@@ -127,12 +131,35 @@ namespace NewsAgregator.API.Controllers
 
             if (articleForUserFromRepo == null)
             {
-                return NotFound();
+                var articleDto = new ArticleForUpdateDto();
+                patchDocument.ApplyTo(articleDto, ModelState);
+
+                if (!TryValidateModel(articleDto))
+                {
+                    return ValidationProblem(ModelState);
+                }
+
+                var articleToAdd = _mapper.Map<Article>(articleDto);
+                articleToAdd.Id = articleId;
+
+                _articleLibraryRepository.AddArticle(userId, articleToAdd);
+                _articleLibraryRepository.Save();
+
+                var articleToReturn = _mapper.Map<ArticleDto>(articleToAdd);
+
+                return CreatedAtRoute("GetArticleForUser",
+                    new {userId, articleId = articleToReturn.Id},
+                    articleToReturn);
             }
 
             var articleToPatch = _mapper.Map<ArticleForUpdateDto>(articleForUserFromRepo);
             // add validation
-            patchDocument.ApplyTo(articleToPatch);
+            patchDocument.ApplyTo(articleToPatch, ModelState);
+
+            if (!TryValidateModel(articleToPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
 
             _mapper.Map(articleToPatch, articleForUserFromRepo);
 
@@ -141,6 +168,36 @@ namespace NewsAgregator.API.Controllers
             _articleLibraryRepository.Save();
 
             return NoContent();
+        }
+
+        [HttpDelete("{articleId}")]
+        public ActionResult DeleteArticleForUser(Guid userId, Guid articleId)
+        {
+            if (!_articleLibraryRepository.UserExists(userId))
+            {
+                return NotFound();
+            }
+
+            var articleForUserFromRepo = _articleLibraryRepository.GetArticle(userId, articleId);
+
+            if (articleForUserFromRepo == null)
+            {
+                return NotFound();
+            }
+            
+            _articleLibraryRepository.DeleteArticle(articleForUserFromRepo);
+            _articleLibraryRepository.Save();
+
+            return NoContent();
+        }
+
+        public override ActionResult ValidationProblem(
+            [ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
+        {
+            var options = HttpContext.RequestServices
+                .GetRequiredService<IOptions<ApiBehaviorOptions>>();
+            return (ActionResult) options.Value.InvalidModelStateResponseFactory(ControllerContext);
+            return base.ValidationProblem(modelStateDictionary);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace NewsAgregator.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        [HttpGet()]
+        [HttpGet]
         [HttpHead ]
         public ActionResult<IEnumerable<UserDto>> GetUsers(string email, string searchQuery)
         {
@@ -68,6 +68,22 @@ namespace NewsAgregator.API.Controllers
             return Ok();
         }
 
-        
+        [HttpDelete("{userId}")]
+        public ActionResult DeleteUser(Guid userId)
+        {
+            var userFromRepo = _articleLibraryRepository.GetUser(userId);
+
+            if (userFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            _articleLibraryRepository.DeleteUser(userFromRepo);
+
+            _articleLibraryRepository.Save();
+
+            return NoContent();
+        }
+
     }
 }
