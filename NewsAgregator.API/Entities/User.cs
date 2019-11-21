@@ -22,6 +22,7 @@ namespace NewsAgregator.API.Entities
 
         [Required]
         public string Password { get; set; }
+        public string Token { get; set; }
 
         [Required]
         public DateTimeOffset DateOfBirth { get; set; }

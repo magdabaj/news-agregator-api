@@ -1,20 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
+using CourseLibrary.API;
 using CourseLibrary.API.DbContexts;
 using CourseLibrary.API.Entities;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using NewsAgregator.API.Entities;
+using NewsAgregator.API.Helpers;
 
 namespace NewsAgregator.API.Services
 {
     public class ArticleLibraryRepository : IArticleLibraryRepository, IDisposable
     {
         private readonly CourseLibraryContext _context;
+        private readonly IOptions<JwtAuthentication> _jwtAuthentication;
 
-        public ArticleLibraryRepository(CourseLibraryContext context)
+        public ArticleLibraryRepository(CourseLibraryContext context, IOptions<JwtAuthentication> jwtAuthentication)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            //_appSettings = appSettings.Value;
+            _jwtAuthentication = jwtAuthentication ??
+                throw new ArgumentNullException(nameof(jwtAuthentication));
         }
         public void AddArticle(Guid userId, Article article)
         {
@@ -47,6 +58,46 @@ namespace NewsAgregator.API.Services
             }
 
             _context.Users.Add(user);
+        }
+
+        public User Authenticate(string email, string password)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            var token = new JwtSecurityToken(
+                issuer: _jwtAuthentication.Value.ValidIssuer,
+                audience: _jwtAuthentication.Value.ValidAudience,
+                claims: new[]
+                {
+                // You can add more claims if you want
+                new Claim(JwtRegisteredClaimNames.Sub, email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                },
+                expires: DateTime.UtcNow.AddDays(30),
+                notBefore: DateTime.UtcNow,
+                signingCredentials: _jwtAuthentication.Value.SigningCredentials);
+
+            //var tokenHandler = new JwtSecurityTokenHandler();
+            //var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            //var tokenDescriptor = new SecurityTokenDescriptor
+            //{
+            //    Subject = new ClaimsIdentity(new Claim[]
+            //    {
+            //        new Claim(ClaimTypes.Name, user.Id.ToString())
+            //    }),
+            //    Expires = DateTime.UtcNow.AddDays(7),
+            //    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            //};
+            //var token = tokenHandler.CreateToken(tokenDescriptor);
+            user.Token = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return user;
+
         }
 
         public void DeleteArticle(Article article)
@@ -187,5 +238,7 @@ namespace NewsAgregator.API.Services
 
             return _context.Users.Any(u => u.Id == userId);
         }
+
+        
     }
 }

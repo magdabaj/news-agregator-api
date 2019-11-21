@@ -21,10 +21,7 @@ namespace NewsAgregator.API.Profiles
                 dest => dest.Age,
                 opt => opt.MapFrom(src => src.DateOfBirth.GetCurrectAge()));
 
-            CreateMap<Models.UserForCreationDto, Entities.User>()
-                .ForMember(
-                dest => dest.Password,
-                opt => opt.MapFrom(src => HashPassword(src.Password)));
+            CreateMap<Models.UserForCreationDto, Entities.User>();
         }
 
 

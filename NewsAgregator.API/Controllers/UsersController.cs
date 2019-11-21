@@ -1,21 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using AutoMapper;
+using CourseLibrary.API;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using NewsAgregator.API.Helpers;
 using NewsAgregator.API.Models;
 using NewsAgregator.API.Services;
 
 namespace NewsAgregator.API.Controllers
 {
+
+
     [ApiController]
+    [Authorize]
     [Route("api/users")]
-    public class UsersController: ControllerBase
+    public class UsersController: Controller
     {
         private readonly IArticleLibraryRepository _articleLibraryRepository;
         private readonly IMapper _mapper;
+        //private readonly IOptions<JwtAuthentication> _jwtAuthentication;
+        //private object jwtAuthentication;
 
         public UsersController(IArticleLibraryRepository articleLibraryRepository, IMapper mapper)
         {
@@ -24,10 +37,14 @@ namespace NewsAgregator.API.Controllers
 
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
+
+            //_jwtAuthentication = jwtAuthentication ??
+            //    throw new ArgumentNullException(nameof(jwtAuthentication));
         }
 
         [HttpGet]
         [HttpHead ]
+        [AllowAnonymous]
         public ActionResult<IEnumerable<UserDto>> GetUsers(string email, string searchQuery)
         {
             var usersFromRepo = _articleLibraryRepository.GetUsers(email, searchQuery);
@@ -60,6 +77,21 @@ namespace NewsAgregator.API.Controllers
                 new { userId = userToReturn.Id },
                 userToReturn);
         }
+
+        [HttpPost("authenticate")]
+        [AllowAnonymous]
+        public IActionResult GenerateToken([FromBody]UserAuthenticateDto model)
+        { 
+            var userFromRepo = _articleLibraryRepository.Authenticate(model.Email, model.Password);
+            // TODO use your actual logic to validate a user
+            if (userFromRepo == null)
+                return BadRequest("Username or password is invalid");
+
+            Console.WriteLine(userFromRepo.Token);
+
+            return Ok(userFromRepo);
+        }
+
 
         [HttpOptions]
         public IActionResult GetUsersOptions()

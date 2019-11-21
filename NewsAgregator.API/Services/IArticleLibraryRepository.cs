@@ -8,6 +8,7 @@ namespace NewsAgregator.API.Services
 {
     public interface IArticleLibraryRepository
     {
+        User Authenticate(string email, string password);
         IEnumerable<Article> GetAllArticles();
         IEnumerable<Article> GetArticles(Guid userId);
         Article GetArticle(Guid userId, Guid articleId);

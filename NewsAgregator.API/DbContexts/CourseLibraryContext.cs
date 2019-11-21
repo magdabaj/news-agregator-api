@@ -83,8 +83,9 @@ namespace CourseLibrary.API.DbContexts
                     FirstName = "Tony",
                     LastName = "Stark",
                     Email = "i.am.iron.man@slash.com",
-                    Password = HashPassword("tony"),
+                    Password =HashPassword("tony"),
                     DateOfBirth = new DateTime(1980, 7, 23),
+                    Token = null,
                 },
                 new User()
                 {
@@ -94,6 +95,7 @@ namespace CourseLibrary.API.DbContexts
                     Email = "black.widow@slash.com",
                     Password = HashPassword("black"),
                     DateOfBirth = new DateTime(1982, 7, 23),
+                    Token = null,
                 }
                 );
 

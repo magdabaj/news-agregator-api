@@ -1,7 +1,10 @@
 using System;
+using System.Security.Claims;
+using System.Text;
 using AutoMapper;
 using CourseLibrary.API.DbContexts;
 using CourseLibrary.API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +14,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using NewsAgregator.API.Helpers;
 using NewsAgregator.API.Services;
 using Newtonsoft.Json.Serialization;
 
 namespace CourseLibrary.API
 {
+
+    public class JwtAuthentication
+    {
+        public string SecurityKey { get; set; }
+        public string ValidIssuer { get; set; }
+        public string ValidAudience { get; set; }
+
+        public SymmetricSecurityKey SymmetricSecurityKey => new SymmetricSecurityKey(Convert.FromBase64String(SecurityKey));
+        public SigningCredentials SigningCredentials => new SigningCredentials(SymmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+    }
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -39,7 +56,18 @@ namespace CourseLibrary.API
                                         "http://www.contoso.com");
                 });
             });
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+            services.Configure<JwtAuthentication>(Configuration.GetSection("JwtAuthentication"));
+
+
+            // I use PostConfigureOptions to be able to use dependency injection for the configuration
+            // For simple needs, you can set the configuration directly in AddJwtBearer()
+            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer();
+
 
             services.AddControllers(setupAction =>
            {
@@ -84,6 +112,37 @@ namespace CourseLibrary.API
             }); 
         }
 
+        private class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
+        {
+            private readonly IOptions<JwtAuthentication> _jwtAuthentication;
+
+            public ConfigureJwtBearerOptions(IOptions<JwtAuthentication> jwtAuthentication)
+            {
+                _jwtAuthentication = jwtAuthentication ?? throw new System.ArgumentNullException(nameof(jwtAuthentication));
+            }
+
+            public void PostConfigure(string name, JwtBearerOptions options)
+            {
+                var jwtAuthentication = _jwtAuthentication.Value;
+
+                options.ClaimsIssuer = jwtAuthentication.ValidIssuer;
+                options.IncludeErrorDetails = true;
+                options.RequireHttpsMetadata = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateActor = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtAuthentication.ValidIssuer,
+                    ValidAudience = jwtAuthentication.ValidAudience,
+                    IssuerSigningKey = jwtAuthentication.SymmetricSecurityKey,
+                    NameClaimType = ClaimTypes.NameIdentifier
+                };
+            }
+        }
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -108,6 +167,7 @@ namespace CourseLibrary.API
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
