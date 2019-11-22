@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsAgregator.API.Models;
 using NewsAgregator.API.Services;
@@ -26,6 +27,7 @@ namespace NewsAgregator.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult<IEnumerable<ArticleDto>> GetAllArticles()
         {
             var articlesFromRepo = _articleLibraryRepository.GetAllArticles();

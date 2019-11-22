@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using AutoMapper;
 using CourseLibrary.API;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +22,11 @@ namespace NewsAgregator.API.Controllers
 
 
     [ApiController]
-    [Authorize]
     [Route("api/users")]
     public class UsersController: Controller
     {
         private readonly IArticleLibraryRepository _articleLibraryRepository;
         private readonly IMapper _mapper;
-        //private readonly IOptions<JwtAuthentication> _jwtAuthentication;
-        //private object jwtAuthentication;
 
         public UsersController(IArticleLibraryRepository articleLibraryRepository, IMapper mapper)
         {
@@ -37,9 +35,6 @@ namespace NewsAgregator.API.Controllers
 
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
-
-            //_jwtAuthentication = jwtAuthentication ??
-            //    throw new ArgumentNullException(nameof(jwtAuthentication));
         }
 
         [HttpGet]
@@ -66,6 +61,7 @@ namespace NewsAgregator.API.Controllers
         }
 
         [HttpPost]
+
         public ActionResult<UserDto> CreateUser(UserForCreationDto user)
         {
             var userEntity = _mapper.Map<Entities.User>(user);
@@ -83,7 +79,7 @@ namespace NewsAgregator.API.Controllers
         public IActionResult GenerateToken([FromBody]UserAuthenticateDto model)
         { 
             var userFromRepo = _articleLibraryRepository.Authenticate(model.Email, model.Password);
-            // TODO use your actual logic to validate a user
+           
             if (userFromRepo == null)
                 return BadRequest("Username or password is invalid");
 

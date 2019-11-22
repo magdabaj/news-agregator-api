@@ -5,10 +5,12 @@ using AutoMapper;
 using CourseLibrary.API.DbContexts;
 using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -53,11 +55,21 @@ namespace CourseLibrary.API
                 builder =>
                 {
                     builder.WithOrigins("http://localhost:3000",
-                                        "http://www.contoso.com");
+                                        "http://www.contoso.com")
+                                         .AllowAnyHeader()
+                                         .AllowAnyMethod();
                 });
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddMvc(config =>
+            {
+                var policy = new AuthorizationPolicyBuilder()
+                        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                        .RequireAuthenticatedUser()
+                        .Build();
+                config.Filters.Add(new AuthorizeFilter(policy));
+            }
+            ).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.Configure<JwtAuthentication>(Configuration.GetSection("JwtAuthentication"));
 
@@ -109,7 +121,7 @@ namespace CourseLibrary.API
             {
                 options.UseSqlServer(
                     @"Server=(localdb)\mssqllocaldb;Database=CourseLibraryDB;Trusted_Connection=True;");
-            }); 
+            });
         }
 
         private class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
