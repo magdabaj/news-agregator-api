@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NewsAgregator.API.Entities;
+using NewsAgregator.API.Helpers;
+using NewsAgregator.API.ResourceParameters;
 
 namespace NewsAgregator.API.Services
 {
@@ -23,6 +25,7 @@ namespace NewsAgregator.API.Services
         void DeleteUser(User user);
         void UpdateUser(User user);
         bool UserExists(Guid userId);
+        PageList<User> GetUsers(UsersResourceParameters usersResourceParameters);
         bool Save();
     }
 }

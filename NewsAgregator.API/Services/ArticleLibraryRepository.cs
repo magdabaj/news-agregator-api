@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NewsAgregator.API.Entities;
 using NewsAgregator.API.Helpers;
+using NewsAgregator.API.ResourceParameters;
 
 namespace NewsAgregator.API.Services
 {
@@ -160,6 +161,34 @@ namespace NewsAgregator.API.Services
         public IEnumerable<User> GetUsers()
         {
             return _context.Users.ToList<User>();
+        }
+
+        public PageList<User> GetUsers(UsersResourceParameters usersResourceParameters)
+        {
+            if (usersResourceParameters == null)
+            {
+                throw new ArgumentNullException(nameof(usersResourceParameters));
+            }
+
+            var collection = _context.Users as IQueryable<User>;
+
+            if (!string.IsNullOrWhiteSpace(usersResourceParameters.Email))
+            {
+                var email = usersResourceParameters.Email.Trim();
+                collection = collection.Where(user => user.Email == email);
+            }
+
+            if (!string.IsNullOrWhiteSpace(usersResourceParameters.SearchQuery))
+            {
+                var searchQuery = usersResourceParameters.SearchQuery.Trim();
+                collection = collection.Where(user => user.Email.Contains(searchQuery)
+                || user.FirstName.Contains(searchQuery)
+                || user.LastName.Contains(searchQuery));
+            }
+
+            return PageList<User>.Create(collection,
+                usersResourceParameters.PageNumber,
+                usersResourceParameters.PageSize);
         }
 
         public IEnumerable<User> GetUsers(string email, string searchQuery)

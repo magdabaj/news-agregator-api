@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
 using CourseLibrary.API;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NewsAgregator.API.Helpers;
 using NewsAgregator.API.Models;
+using NewsAgregator.API.ResourceParameters;
 using NewsAgregator.API.Services;
 
 namespace NewsAgregator.API.Controllers
@@ -37,13 +39,35 @@ namespace NewsAgregator.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        [HttpGet]
-        [HttpHead ]
+        [HttpGet(Name = "GetUsers")]
+        [HttpHead]
         [AllowAnonymous]
-        public ActionResult<IEnumerable<UserDto>> GetUsers(string email, string searchQuery)
+        public ActionResult<IEnumerable<UserDto>> GetUsers([FromQuery] UsersResourceParameters usersResourceParameters)
         {
-            var usersFromRepo = _articleLibraryRepository.GetUsers(email, searchQuery);
-            
+            var usersFromRepo = _articleLibraryRepository.GetUsers(usersResourceParameters);
+            var previousPageLink = usersFromRepo.HasPrevious
+                ? CreateUsersResourceUri(usersResourceParameters,
+                    ResourceUriTypes.PreviousPage)
+                : null;
+
+            var nextPageLink = usersFromRepo.HasNext
+                ? CreateUsersResourceUri(usersResourceParameters,
+                    ResourceUriTypes.NextPage)
+                : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = usersFromRepo.TotalCount,
+                pageSize = usersFromRepo.PageSize,
+                currentPage = usersFromRepo.CurrentPage,
+                totalPages = usersFromRepo.TotalPages,
+                previousPageLink,
+                nextPageLink,
+            };
+
+            Response.Headers.Add("X-Pagination",
+                JsonSerializer.Serialize(paginationMetadata));
+
             return Ok(_mapper.Map<IEnumerable<UserDto>>(usersFromRepo));
         }
 
@@ -111,6 +135,42 @@ namespace NewsAgregator.API.Controllers
             _articleLibraryRepository.Save();
 
             return NoContent();
+        }
+
+        private string CreateUsersResourceUri(
+            UsersResourceParameters usersResourceParameters,
+            ResourceUriTypes type)
+        {
+            switch (type)
+            {
+                case ResourceUriTypes.PreviousPage:
+                    return Url.Link("GetUsers",
+                        new
+                        {
+                            pageNumber = usersResourceParameters.PageNumber - 1,
+                            pageSize = usersResourceParameters.PageSize,
+                            Email = usersResourceParameters.Email,
+                            searchQuery = usersResourceParameters.SearchQuery,
+                        });
+                case ResourceUriTypes.NextPage:
+                    return Url.Link("GetUsers",
+                        new
+                        {
+                            pageNumber = usersResourceParameters.PageNumber + 1,
+                            pageSize = usersResourceParameters.PageSize,
+                            Email = usersResourceParameters.Email,
+                            searchQuery = usersResourceParameters.SearchQuery,
+                        });
+                default:
+                    return Url.Link("GetUsers",
+                        new
+                        {
+                            pageNumber = usersResourceParameters.PageNumber,
+                            pageSize = usersResourceParameters.PageSize,
+                            Email = usersResourceParameters.Email,
+                            searchQuery = usersResourceParameters.SearchQuery,
+                        });
+            }
         }
 
     }
