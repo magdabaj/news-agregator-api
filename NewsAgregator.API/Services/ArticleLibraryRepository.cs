@@ -272,7 +272,8 @@ namespace NewsAgregator.API.Services
 
         public void UpdateArticle(Article article)
         {
-            //
+            var currentDate = DateTime.Now;
+            article.EditDate = currentDate;
         }
 
         public void UpdateUser(User user)
