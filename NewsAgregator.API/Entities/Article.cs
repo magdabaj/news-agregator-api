@@ -17,6 +17,8 @@ namespace NewsAgregator.API.Entities
 
         [Required]
         public string Url { get; set; }
+        public DateTimeOffset AddedDate { get; set; }
+        public DateTimeOffset EditDate { get; set; }
 
         [ForeignKey("UserId")]
         public User User { get; set; }

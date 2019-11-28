@@ -107,6 +107,8 @@ namespace CourseLibrary.API.DbContexts
                     Url = "https://medium.com/better-programming/lets-build-a-customizable-rich-text-editor-with-slate-and-react-beefd5d441f2",
                     UserEmail = "i.am.iron.man@slash.com",
                     UserId = Guid.Parse("e9cf0077-6ee7-472f-912d-441d4a0eca17"),
+                    AddedDate = new DateTime(2019, 11, 18),
+                    EditDate = new DateTime(2019,11,19),
                 },
                 new Article
                 {
@@ -115,6 +117,8 @@ namespace CourseLibrary.API.DbContexts
                     Url = "https://medium.com/better-programming/lets-build-a-customizable-rich-text-editor-with-slate-and-react-beefd5d441f2",
                     UserEmail = "black.widow@slash.com",
                     UserId = Guid.Parse("faf31b0e-076f-4cf9-be97-c039d6eb7c6b"),
+                    AddedDate = new DateTime(2019, 10, 28),
+                    EditDate = new DateTime(2019, 11, 28),
                 });
 
             // seed the database with dummy data

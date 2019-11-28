@@ -11,6 +11,8 @@ namespace NewsAgregator.API.Models
         public string Title { get; set; }
         public string Url { get; set; }
         public string UserId { get; set; }
+        public DateTimeOffset AddedDate { get; set; }
+        public DateTimeOffset EditDate { get; set; }
 
     }
 }

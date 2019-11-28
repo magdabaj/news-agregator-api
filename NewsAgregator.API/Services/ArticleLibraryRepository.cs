@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NewsAgregator.API.Entities;
 using NewsAgregator.API.Helpers;
+using NewsAgregator.API.Models;
 using NewsAgregator.API.ResourceParameters;
 
 namespace NewsAgregator.API.Services
@@ -20,13 +21,16 @@ namespace NewsAgregator.API.Services
     {
         private readonly CourseLibraryContext _context;
         private readonly IOptions<JwtAuthentication> _jwtAuthentication;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public ArticleLibraryRepository(CourseLibraryContext context, IOptions<JwtAuthentication> jwtAuthentication)
+        public ArticleLibraryRepository(CourseLibraryContext context, IOptions<JwtAuthentication> jwtAuthentication, IPropertyMappingService propertyMappingService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             //_appSettings = appSettings.Value;
             _jwtAuthentication = jwtAuthentication ??
                 throw new ArgumentNullException(nameof(jwtAuthentication));
+            _propertyMappingService = propertyMappingService ?? 
+                                      throw new ArgumentNullException(nameof(propertyMappingService));
         }
         public void AddArticle(Guid userId, Article article)
         {
@@ -41,6 +45,8 @@ namespace NewsAgregator.API.Services
             }
 
             article.UserId = userId;
+            DateTime currentDateTime = DateTime.Now;
+            article.AddedDate = currentDateTime;
             _context.Articles.Add(article);
         }
 
@@ -184,6 +190,22 @@ namespace NewsAgregator.API.Services
                 collection = collection.Where(user => user.Email.Contains(searchQuery)
                 || user.FirstName.Contains(searchQuery)
                 || user.LastName.Contains(searchQuery));
+            }
+
+            if (!string.IsNullOrWhiteSpace(usersResourceParameters.SearchQuery))
+            {
+                var searchQuery = usersResourceParameters.SearchQuery.Trim();
+                collection = collection.Where(user => user.Email.Contains(searchQuery)
+                                                      || user.FirstName.Contains(searchQuery)
+                                                      || user.LastName.Contains(searchQuery));
+            }
+
+            if (!string.IsNullOrWhiteSpace(usersResourceParameters.OrderBy))
+            {
+                // get mapping dictionary 
+                var userPropertyMappingDictionary = _propertyMappingService.GetPropertyMapping<UserDto, User>();
+
+                collection = collection.ApplySort(usersResourceParameters.OrderBy, userPropertyMappingDictionary);
             }
 
             return PageList<User>.Create(collection,

@@ -4,14 +4,16 @@ using CourseLibrary.API.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace NewsAgregator.API.Migrations
 {
     [DbContext(typeof(CourseLibraryContext))]
-    partial class CourseLibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20191128110236_AddedDateUserMigration")]
+    partial class AddedDateUserMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -198,7 +200,7 @@ namespace NewsAgregator.API.Migrations
                         {
                             Id = new Guid("af1113cb-2c29-44af-b760-91dd7e852422"),
                             AddedDate = new DateTimeOffset(new DateTime(2019, 11, 18, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 1, 0, 0, 0)),
-                            EditDate = new DateTimeOffset(new DateTime(2019, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 1, 0, 0, 0)),
+                            EditDate = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Title = "Let’s Build a Fast, Slick and Customizable Rich Text Editor With Slate.js and React",
                             Url = "https://medium.com/better-programming/lets-build-a-customizable-rich-text-editor-with-slate-and-react-beefd5d441f2",
                             UserEmail = "i.am.iron.man@slash.com",
@@ -208,7 +210,7 @@ namespace NewsAgregator.API.Migrations
                         {
                             Id = new Guid("03fbcf0a-7ccb-433e-8b8a-086db3138638"),
                             AddedDate = new DateTimeOffset(new DateTime(2019, 10, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 1, 0, 0, 0)),
-                            EditDate = new DateTimeOffset(new DateTime(2019, 11, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 1, 0, 0, 0)),
+                            EditDate = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Title = "Let’s Build a Fast, Slick and Customizable Rich Text Editor With Slate.js and React",
                             Url = "https://medium.com/better-programming/lets-build-a-customizable-rich-text-editor-with-slate-and-react-beefd5d441f2",
                             UserEmail = "black.widow@slash.com",
@@ -303,7 +305,7 @@ namespace NewsAgregator.API.Migrations
                             Email = "i.am.iron.man@slash.com",
                             FirstName = "Tony",
                             LastName = "Stark",
-                            Password = "EPIvEvr9Sj8wbmWDkif5FszoqJV3SPTkKxrGvOrA+78="
+                            Password = "WU9OPE04S07CjUNMj1UIktCtwOWhvxSSy0YNXbTlvu8="
                         },
                         new
                         {
@@ -312,7 +314,7 @@ namespace NewsAgregator.API.Migrations
                             Email = "black.widow@slash.com",
                             FirstName = "Black",
                             LastName = "Widow",
-                            Password = "v/G+R+b+Vf2s1GXBTU6/WjsHv9QnJnx+ucdZGQvR754="
+                            Password = "2OZeXZPNR3Zbp2wExbngT23ii8dDmb2N0z9i91f36Jk="
                         });
                 });
 

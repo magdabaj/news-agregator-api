@@ -29,14 +29,19 @@ namespace NewsAgregator.API.Controllers
     {
         private readonly IArticleLibraryRepository _articleLibraryRepository;
         private readonly IMapper _mapper;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public UsersController(IArticleLibraryRepository articleLibraryRepository, IMapper mapper)
+        public UsersController(IArticleLibraryRepository articleLibraryRepository, IMapper mapper,
+            IPropertyMappingService propertyMappingService)
         {
             _articleLibraryRepository = articleLibraryRepository ??
                 throw new ArgumentNullException(nameof(articleLibraryRepository));
 
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
+
+            _propertyMappingService = propertyMappingService ??
+                                      throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
         [HttpGet(Name = "GetUsers")]
@@ -44,6 +49,11 @@ namespace NewsAgregator.API.Controllers
         [AllowAnonymous]
         public ActionResult<IEnumerable<UserDto>> GetUsers([FromQuery] UsersResourceParameters usersResourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<UserDto, Entities.User>(usersResourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var usersFromRepo = _articleLibraryRepository.GetUsers(usersResourceParameters);
             var previousPageLink = usersFromRepo.HasPrevious
                 ? CreateUsersResourceUri(usersResourceParameters,
@@ -147,6 +157,7 @@ namespace NewsAgregator.API.Controllers
                     return Url.Link("GetUsers",
                         new
                         {
+                            orderBy = usersResourceParameters.OrderBy,
                             pageNumber = usersResourceParameters.PageNumber - 1,
                             pageSize = usersResourceParameters.PageSize,
                             Email = usersResourceParameters.Email,
@@ -156,6 +167,7 @@ namespace NewsAgregator.API.Controllers
                     return Url.Link("GetUsers",
                         new
                         {
+                            orderBy = usersResourceParameters.OrderBy,
                             pageNumber = usersResourceParameters.PageNumber + 1,
                             pageSize = usersResourceParameters.PageSize,
                             Email = usersResourceParameters.Email,
@@ -165,6 +177,7 @@ namespace NewsAgregator.API.Controllers
                     return Url.Link("GetUsers",
                         new
                         {
+                            orderBy = usersResourceParameters.OrderBy,
                             pageNumber = usersResourceParameters.PageNumber,
                             pageSize = usersResourceParameters.PageSize,
                             Email = usersResourceParameters.Email,
