@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsAgregator.API.Models;
+using NewsAgregator.API.ResourceParameters;
 using NewsAgregator.API.Services;
 
 namespace NewsAgregator.API.Controllers
@@ -16,21 +17,34 @@ namespace NewsAgregator.API.Controllers
     {
         private readonly IArticleLibraryRepository _articleLibraryRepository;
         private readonly IMapper _mapper;
+        private readonly IPropertyMappingService _propertyMappingService;
 
         public ArticlesAllCollectionController(IArticleLibraryRepository articleLibraryRepository,
-            IMapper mapper)
+            IMapper mapper, IPropertyMappingService propertyMappingService)
         {
             _articleLibraryRepository = articleLibraryRepository ??
                 throw new ArgumentNullException(nameof(articleLibraryRepository));
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
+            _propertyMappingService = propertyMappingService ??
+                throw new ArgumentNullException(nameof(propertyMappingService));
         }
+
+        //[HttpGet]
+        //[AllowAnonymous]
+        //public ActionResult<IEnumerable<ArticleDto>> GetAllArticles()
+        //{
+        //    var articlesFromRepo = _articleLibraryRepository.GetAllArticles();
+
+        //    return Ok(_mapper.Map<IEnumerable<ArticleDto>>(articlesFromRepo));
+        //}
+
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult<IEnumerable<ArticleDto>> GetAllArticles()
+        public ActionResult<IEnumerable<ArticleDto>> GetArticles([FromQuery] ArticlesResourceParameters articlesResourceParameters)
         {
-            var articlesFromRepo = _articleLibraryRepository.GetAllArticles();
+            var articlesFromRepo = _articleLibraryRepository.GetAllArticles(articlesResourceParameters);
 
             return Ok(_mapper.Map<IEnumerable<ArticleDto>>(articlesFromRepo));
         }

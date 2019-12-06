@@ -26,6 +26,7 @@ namespace NewsAgregator.API.Services
         void UpdateUser(User user);
         bool UserExists(Guid userId);
         PageList<User> GetUsers(UsersResourceParameters usersResourceParameters);
+        IEnumerable<Article> GetAllArticles(ArticlesResourceParameters articlesResourceParameters);
         bool Save();
     }
 }

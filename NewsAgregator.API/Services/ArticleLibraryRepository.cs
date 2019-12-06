@@ -45,8 +45,7 @@ namespace NewsAgregator.API.Services
             }
 
             article.UserId = userId;
-            DateTime currentDateTime = DateTime.Now;
-            article.AddedDate = currentDateTime;
+            article.AddedDate = DateTime.Now;
             _context.Articles.Add(article);
         }
 
@@ -83,6 +82,7 @@ namespace NewsAgregator.API.Services
                 {
                 // You can add more claims if you want
                 new Claim(JwtRegisteredClaimNames.Sub, email),
+                // todo provide unique email
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 },
                 expires: DateTime.UtcNow.AddDays(30),
@@ -125,6 +125,33 @@ namespace NewsAgregator.API.Services
         public IEnumerable<Article> GetAllArticles()
         {
             return _context.Articles.ToList<Article>();
+        }
+
+        public IEnumerable<Article> GetAllArticles(ArticlesResourceParameters articlesResourceParameters)
+        {
+            if (articlesResourceParameters == null)
+            {
+                throw new ArgumentNullException(nameof(articlesResourceParameters));
+            }
+
+            var collection = _context.Articles as IQueryable<Article>;
+
+            if (!string.IsNullOrWhiteSpace(articlesResourceParameters.Title))
+            {
+                var title = articlesResourceParameters.Title.Trim();
+                collection = collection.Where(article => article.Title == title);
+            }
+
+            if (!string.IsNullOrWhiteSpace(articlesResourceParameters.SearchQuery))
+            {
+                var searchQuery = articlesResourceParameters.SearchQuery.Trim();
+                collection = collection.Where(article => article.Title.Contains(searchQuery));
+            }
+
+            return collection
+                .Skip(articlesResourceParameters.PageSize * (articlesResourceParameters.PageNumber - 1))
+                .Take(articlesResourceParameters.PageSize)
+                .ToList();
         }
 
         public Article GetArticle(Guid userId, Guid articleId)

@@ -47,7 +47,9 @@ namespace NewsAgregator.API.Controllers
         [HttpGet(Name = "GetUsers")]
         [HttpHead]
         [AllowAnonymous]
-        public ActionResult<IEnumerable<UserDto>> GetUsers([FromQuery] UsersResourceParameters usersResourceParameters)
+        public ActionResult<IEnumerable<UserDto>> GetUsers([FromQuery] 
+            UsersResourceParameters usersResourceParameters
+            )
         {
             if (!_propertyMappingService.ValidMappingExistsFor<UserDto, Entities.User>(usersResourceParameters.OrderBy))
             {
