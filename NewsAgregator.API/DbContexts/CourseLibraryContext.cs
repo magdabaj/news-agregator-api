@@ -20,6 +20,7 @@ namespace CourseLibrary.API.DbContexts
         public DbSet<User> Users { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<TagsArticles> TagsArticles { get; set; }
 
         public string HashPassword(string password)
         {
@@ -75,6 +76,30 @@ namespace CourseLibrary.API.DbContexts
                     Name = "other",
                 });
 
+                modelBuilder.Entity<TagsArticles>().HasKey(key => new { key.ArticleId, key.TagId });
+                modelBuilder.Entity<TagsArticles>().HasData(
+                new TagsArticles()
+                {
+                    TagId = Guid.Parse("a8bb30d3-4e33-41f3-8725-126ba71a8bd6"),
+                    ArticleId = Guid.Parse("af1113cb-2c29-44af-b760-91dd7e852422"),
+                },
+                new TagsArticles()
+                {
+                    TagId = Guid.Parse("1f76c6e7-2933-435c-bacc-1a8092e75c20"),
+                    ArticleId = Guid.Parse("af1113cb-2c29-44af-b760-91dd7e852422"),
+                },
+                 new TagsArticles()
+                 {
+                     TagId = Guid.Parse("a8bb30d3-4e33-41f3-8725-126ba71a8bd6"),
+                     ArticleId = Guid.Parse("03fbcf0a-7ccb-433e-8b8a-086db3138638"),
+                 },
+                   new TagsArticles()
+                   {
+                       TagId = Guid.Parse("bf4d4a26-036d-485d-bfc8-75756463cd5e"),
+                       ArticleId = Guid.Parse("03fbcf0a-7ccb-433e-8b8a-086db3138638"),
+                   }
+                );
+
             
             modelBuilder.Entity<User>().HasData(
                 new User()
@@ -113,8 +138,8 @@ namespace CourseLibrary.API.DbContexts
                 new Article
                 {
                     Id = Guid.Parse("03fbcf0a-7ccb-433e-8b8a-086db3138638"),
-                    Title = "Let’s Build a Fast, Slick and Customizable Rich Text Editor With Slate.js and React",
-                    Url = "https://medium.com/better-programming/lets-build-a-customizable-rich-text-editor-with-slate-and-react-beefd5d441f2",
+                    Title = "An open source React library to power production-ready animations.",
+                    Url = "https://www.framer.com/motion/",
                     UserEmail = "black.widow@slash.com",
                     UserId = Guid.Parse("faf31b0e-076f-4cf9-be97-c039d6eb7c6b"),
                     AddedDate = new DateTime(2019, 10, 28),

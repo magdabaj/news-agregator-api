@@ -12,6 +12,7 @@ namespace NewsAgregator.API.Services
     {
         User Authenticate(string email, string password);
         IEnumerable<Article> GetAllArticles();
+        IEnumerable<object> GetArticlesByTag(Guid tagId);
         IEnumerable<Article> GetArticles(Guid userId);
         Article GetArticle(Guid userId, Guid articleId);
         void AddArticle(Guid userId, Article article);

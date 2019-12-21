@@ -4,14 +4,16 @@ using CourseLibrary.API.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace NewsAgregator.API.Migrations
 {
     [DbContext(typeof(CourseLibraryContext))]
-    partial class CourseLibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20191221085440_migration2")]
+    partial class migration2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -338,7 +340,7 @@ namespace NewsAgregator.API.Migrations
                             Email = "i.am.iron.man@slash.com",
                             FirstName = "Tony",
                             LastName = "Stark",
-                            Password = "zmmUQ1qOxbU31e0MxNX5Y6CmjYyhjoJbNGVAYlNAwqk="
+                            Password = "1GpdmXdq4HiedoUd+ELEBHZqnHS0jt2qJnC9P9WQeyw="
                         },
                         new
                         {
@@ -347,7 +349,7 @@ namespace NewsAgregator.API.Migrations
                             Email = "black.widow@slash.com",
                             FirstName = "Black",
                             LastName = "Widow",
-                            Password = "DUEqxWr6o/sniYVBXnYzr3XFUeGWRSdsD9KTdHmy4vA="
+                            Password = "A74jxjId8wm5i6EndSx0qvsTEVTDM2ewuNiK1mjukLw="
                         });
                 });
 

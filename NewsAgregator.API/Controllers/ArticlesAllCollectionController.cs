@@ -16,23 +16,23 @@ namespace NewsAgregator.API.Controllers
     public class ArticlesAllCollectionController : ControllerBase
     {
         private readonly IArticleLibraryRepository _articleLibraryRepository;
+        private readonly ITagLibraryRepository _tagLibraryRepository;
         private readonly IMapper _mapper;
-        private readonly IPropertyMappingService _propertyMappingService;
 
         public ArticlesAllCollectionController(IArticleLibraryRepository articleLibraryRepository,
-            IMapper mapper, IPropertyMappingService propertyMappingService)
+            IMapper mapper, ITagLibraryRepository tagLibraryRepository)
         {
             _articleLibraryRepository = articleLibraryRepository ??
                 throw new ArgumentNullException(nameof(articleLibraryRepository));
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
-            _propertyMappingService = propertyMappingService ??
-                throw new ArgumentNullException(nameof(propertyMappingService));
+            _tagLibraryRepository = tagLibraryRepository ??
+                throw new ArgumentNullException(nameof(tagLibraryRepository));
         }
 
         //[HttpGet]
         //[AllowAnonymous]
-        //public ActionResult<IEnumerable<ArticleDto>> GetAllArticles()
+        //public ActionResult<IEnumerable<ArticleDto>> GetAllArticles() 
         //{
         //    var articlesFromRepo = _articleLibraryRepository.GetAllArticles();
 
@@ -47,6 +47,24 @@ namespace NewsAgregator.API.Controllers
             var articlesFromRepo = _articleLibraryRepository.GetAllArticles(articlesResourceParameters);
 
             return Ok(_mapper.Map<IEnumerable<ArticleDto>>(articlesFromRepo));
+        }
+
+        [HttpGet("{tagId}")]
+        [AllowAnonymous]
+        public ActionResult<IEnumerable<object>> GetArticlesByTag(Guid tagId)
+        {
+            if (!_tagLibraryRepository.TagExists(tagId)){
+                return NotFound();
+            }
+
+            var articlesToReturn = _articleLibraryRepository.GetArticlesByTag(tagId);
+
+            if(articlesToReturn == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(articlesToReturn);
         }
     }
 }

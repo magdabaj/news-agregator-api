@@ -177,16 +177,19 @@ namespace CourseLibrary.API
                 } );
             }
 
+
             app.UseCors(MyAllowSpecificOrigins);
 
             app.UseRouting();
 
+
             app.UseAuthorization();
             app.UseAuthentication();
 
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers().RequireCors("policy-name"); ;
+                endpoints.MapControllers()/*.RequireCors("policy-name")*/; 
             });
         }
     }

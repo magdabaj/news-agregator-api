@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -318,6 +319,28 @@ namespace NewsAgregator.API.Services
             return _context.Users.Any(u => u.Id == userId);
         }
 
-        
+        public IEnumerable<object> GetArticlesByTag(Guid tagId)
+        {
+            var result = _context.Articles.GroupJoin(
+                _context.TagsArticles,
+                article => article.Id,
+                detail => detail.ArticleId,
+                (x, y) => new { Article = x, Details = y }
+                )
+                .SelectMany(
+                x => x.Details.DefaultIfEmpty(),
+                (x, y) => new { article = x.Article, Details = y })
+                .Where(
+                x => x.Details.TagId == tagId);
+
+            //var result = _context.TagsArticles.Where(tag => tag.TagId == tagId)
+            //    .Include()
+
+
+
+                         return result;
+            //throw new NotImplementedException();
+
+        }
     }
 }
