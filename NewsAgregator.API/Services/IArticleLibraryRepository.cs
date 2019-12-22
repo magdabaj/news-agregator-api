@@ -15,7 +15,7 @@ namespace NewsAgregator.API.Services
         IEnumerable<object> GetArticlesByTag(Guid tagId);
         IEnumerable<Article> GetArticles(Guid userId);
         Article GetArticle(Guid userId, Guid articleId);
-        void AddArticle(Guid userId, Article article);
+        void AddArticle(Guid userId, Article article, Guid tagId);
         void UpdateArticle(Article article);
         void DeleteArticle(Article article);
         IEnumerable<User> GetUsers();

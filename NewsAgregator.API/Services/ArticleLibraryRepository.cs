@@ -33,14 +33,14 @@ namespace NewsAgregator.API.Services
             _propertyMappingService = propertyMappingService ?? 
                                       throw new ArgumentNullException(nameof(propertyMappingService));
         }
-        public void AddArticle(Guid userId, Article article)
+        public void AddArticle(Guid userId, Article article, Guid tagId)
         {
-            if(userId == Guid.Empty)
+            if (userId == Guid.Empty || tagId == Guid.Empty)
             {
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            if(article == null)
+            if (article == null)
             {
                 throw new ArgumentNullException(nameof(article));
             }
@@ -48,6 +48,13 @@ namespace NewsAgregator.API.Services
             article.UserId = userId;
             article.AddedDate = DateTime.Now;
             _context.Articles.Add(article);
+
+            var tagsArticles = new TagsArticles()
+            {
+                ArticleId = article.Id,
+                TagId = tagId
+            };
+            _context.TagsArticles.Add(tagsArticles);
         }
 
         public void AddUser(User user)
@@ -90,18 +97,6 @@ namespace NewsAgregator.API.Services
                 notBefore: DateTime.UtcNow,
                 signingCredentials: _jwtAuthentication.Value.SigningCredentials);
 
-            //var tokenHandler = new JwtSecurityTokenHandler();
-            //var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            //var tokenDescriptor = new SecurityTokenDescriptor
-            //{
-            //    Subject = new ClaimsIdentity(new Claim[]
-            //    {
-            //        new Claim(ClaimTypes.Name, user.Id.ToString())
-            //    }),
-            //    Expires = DateTime.UtcNow.AddDays(7),
-            //    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            //};
-            //var token = tokenHandler.CreateToken(tokenDescriptor);
             user.Token = new JwtSecurityTokenHandler().WriteToken(token);
 
             return user;
@@ -333,14 +328,7 @@ namespace NewsAgregator.API.Services
                 .Where(
                 x => x.Details.TagId == tagId);
 
-            //var result = _context.TagsArticles.Where(tag => tag.TagId == tagId)
-            //    .Include()
-
-
-
-                         return result;
-            //throw new NotImplementedException();
-
+            return result;
         }
     }
 }

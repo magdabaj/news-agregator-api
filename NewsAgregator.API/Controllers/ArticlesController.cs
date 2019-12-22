@@ -20,12 +20,15 @@ namespace NewsAgregator.API.Controllers
     public class ArticlesController: ControllerBase
     {
         private readonly IArticleLibraryRepository _articleLibraryRepository;
+        private readonly ITagLibraryRepository _tagLibraryRepository;
         private readonly IMapper _mapper;
 
-        public ArticlesController(IArticleLibraryRepository articleLibraryRepository, IMapper mapper)
+        public ArticlesController(IArticleLibraryRepository articleLibraryRepository, IMapper mapper, ITagLibraryRepository tagLibraryRepository)
         {
             _articleLibraryRepository = articleLibraryRepository ??
                 throw new ArgumentNullException(nameof(articleLibraryRepository));
+            _tagLibraryRepository = tagLibraryRepository ??
+                throw new ArgumentNullException(nameof(tagLibraryRepository));
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
         }
@@ -62,16 +65,17 @@ namespace NewsAgregator.API.Controllers
         }
 
 
-        [HttpPost]
-        public ActionResult<ArticleDto> CreateArticleForUser(Guid userId, ArticleForCreationDto article )
+        [HttpPost("{tagId}")]
+        public ActionResult<ArticleDto> CreateArticleForUser(Guid userId, ArticleForCreationDto article, Guid tagId )
         {
-            if (!_articleLibraryRepository.UserExists(userId))
+            if (!_articleLibraryRepository.UserExists(userId) ||
+                !_tagLibraryRepository.TagExists(tagId))
             {
                 return NotFound();
             }
 
             var articleEntity = _mapper.Map<Entities.Article>(article);
-            _articleLibraryRepository.AddArticle(userId, articleEntity);
+            _articleLibraryRepository.AddArticle(userId, articleEntity, tagId);
             _articleLibraryRepository.Save();
 
             var articleToReturn = _mapper.Map<ArticleDto>(articleEntity);
@@ -83,7 +87,7 @@ namespace NewsAgregator.API.Controllers
         [HttpPut("{articleId}")]
         public IActionResult UpdateArticleForUser(Guid userId,
             Guid articleId,
-            ArticleForUpdateDto article)
+            ArticleForUpdateDto article, Guid tagId)
         {
             if (!_articleLibraryRepository.UserExists(userId))
             {
@@ -97,7 +101,7 @@ namespace NewsAgregator.API.Controllers
                 var articleToAdd = _mapper.Map<Article>(article);
                 articleToAdd.Id = articleId;
 
-                _articleLibraryRepository.AddArticle(userId, articleToAdd);
+                _articleLibraryRepository.AddArticle(userId, articleToAdd, tagId);
                 _articleLibraryRepository.Save();
 
                 var articleToReturn = _mapper.Map<ArticleDto>(articleToAdd);
@@ -120,6 +124,7 @@ namespace NewsAgregator.API.Controllers
         [HttpPatch("{articleId}")]
         public IActionResult PartiallyUpdateArticleForUser(Guid userId,
             Guid articleId,
+            Guid tagId,
             JsonPatchDocument<ArticleForUpdateDto> patchDocument)
         {
             if (!_articleLibraryRepository.UserExists((userId)))
@@ -142,7 +147,7 @@ namespace NewsAgregator.API.Controllers
                 var articleToAdd = _mapper.Map<Article>(articleDto);
                 articleToAdd.Id = articleId;
 
-                _articleLibraryRepository.AddArticle(userId, articleToAdd);
+                _articleLibraryRepository.AddArticle(userId, articleToAdd, tagId);
                 _articleLibraryRepository.Save();
 
                 var articleToReturn = _mapper.Map<ArticleDto>(articleToAdd);
