@@ -103,6 +103,11 @@ namespace NewsAgregator.API.Services
 
         }
 
+        private User ArgumentNullException(string v)
+        {
+            throw new NotImplementedException();
+        }
+
         public void DeleteArticle(Article article)
         {
             _context.Articles.Remove(article);
