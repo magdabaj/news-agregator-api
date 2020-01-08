@@ -23,8 +23,9 @@ namespace NewsAgregator.API.Services
         private readonly CourseLibraryContext _context;
         private readonly IOptions<JwtAuthentication> _jwtAuthentication;
         private readonly IPropertyMappingService _propertyMappingService;
+        //private readonly AppSettings _appSettings;
 
-        public ArticleLibraryRepository(CourseLibraryContext context, IOptions<JwtAuthentication> jwtAuthentication, IPropertyMappingService propertyMappingService)
+        public ArticleLibraryRepository(CourseLibraryContext context, IOptions<JwtAuthentication> jwtAuthentication, IPropertyMappingService propertyMappingService/*, IOptions<AppSettings> appSettings*/)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             //_appSettings = appSettings.Value;
@@ -32,6 +33,8 @@ namespace NewsAgregator.API.Services
                 throw new ArgumentNullException(nameof(jwtAuthentication));
             _propertyMappingService = propertyMappingService ?? 
                                       throw new ArgumentNullException(nameof(propertyMappingService));
+            //_appSettings = appSettings.Value ??
+            //    throw new ArgumentNullException(nameof(appSettings));
         }
         public void AddArticle(Guid userId, Article article, Guid tagId)
         {
@@ -65,6 +68,7 @@ namespace NewsAgregator.API.Services
             }
 
             user.Id = Guid.NewGuid();
+            //user.Role = Role.User;
 
             foreach(var article in user.Articles)
             {
@@ -80,7 +84,8 @@ namespace NewsAgregator.API.Services
 
             if (user == null)
             {
-                throw new ArgumentNullException(nameof(user));
+                //throw new ArgumentNullException(nameof(user));
+                return null;
             }
 
             var token = new JwtSecurityToken(
@@ -102,6 +107,33 @@ namespace NewsAgregator.API.Services
             return user;
 
         }
+
+        //public User Authenticate(string email, string password)
+        //{
+        //    var user = _context.Users.SingleOrDefault(u => u.Email == email & u.Password == password);
+
+        //    if(user == null)
+        //    {
+        //        return null;
+        //    }
+
+        //    var tokenHandler = new JwtSecurityTokenHandler();
+        //    var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+        //    var tokenDescriptor = new SecurityTokenDescriptor
+        //    {
+        //        Subject = new ClaimsIdentity(new Claim[]
+        //        {
+        //            new Claim(ClaimTypes.Name, user.Id.ToString()),
+        //            new Claim(ClaimTypes.Role, user.Role)
+        //        }),
+        //        Expires = DateTime.UtcNow.AddDays(7),
+        //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        //    };
+        //    var token = tokenHandler.CreateToken(tokenDescriptor);
+        //    user.Token = tokenHandler.WriteToken(token);
+
+        //    return user.WithoutPassword();
+        //}
 
         private User ArgumentNullException(string v)
         {

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using NewsAgregator.API.Entities;
 using NewsAgregator.API.Helpers;
 using NewsAgregator.API.Models;
 using NewsAgregator.API.ResourceParameters;
@@ -22,7 +23,7 @@ using NewsAgregator.API.Services;
 namespace NewsAgregator.API.Controllers
 {
 
-
+    //[Authorize]
     [ApiController]
     [Route("api/users")]
     public class UsersController: Controller
@@ -46,12 +47,13 @@ namespace NewsAgregator.API.Controllers
 
         [HttpGet(Name = "GetUsers")]
         [HttpHead]
+        //[Authorize(Roles = Role.Admin)]
         [AllowAnonymous]
         public ActionResult<IEnumerable<UserDto>> GetUsers([FromQuery] 
             UsersResourceParameters usersResourceParameters
             )
         {
-            if (!_propertyMappingService.ValidMappingExistsFor<UserDto, Entities.User>(usersResourceParameters.OrderBy))
+            if (!_propertyMappingService.ValidMappingExistsFor<UserDto, User>(usersResourceParameters.OrderBy))
             {
                 return BadRequest();
             }
@@ -97,10 +99,10 @@ namespace NewsAgregator.API.Controllers
         }
 
         [HttpPost]
-
+        [AllowAnonymous]
         public ActionResult<UserDto> CreateUser(UserForCreationDto user)
         {
-            var userEntity = _mapper.Map<Entities.User>(user);
+            var userEntity = _mapper.Map<User>(user);
             _articleLibraryRepository.AddUser(userEntity);
             _articleLibraryRepository.Save();
 
@@ -119,7 +121,7 @@ namespace NewsAgregator.API.Controllers
             if (userFromRepo == null)
                 return BadRequest("Username or password is invalid");
 
-            Console.WriteLine(userFromRepo.Token);
+            //Console.WriteLine(userFromRepo.Token);
 
             return Ok(userFromRepo);
         }
@@ -132,6 +134,7 @@ namespace NewsAgregator.API.Controllers
             return Ok();
         }
 
+        //[Authorize(Roles = Role.Admin)]
         [HttpDelete("{userId}")]
         public ActionResult DeleteUser(Guid userId)
         {

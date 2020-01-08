@@ -26,6 +26,8 @@ namespace NewsAgregator.API.Entities
 
         [Required]
         public DateTimeOffset DateOfBirth { get; set; }
+        [Required]
+        public string Role { get; set; }
 
         public ICollection<Article> Articles { get; set; } 
             = new List<Article>();
