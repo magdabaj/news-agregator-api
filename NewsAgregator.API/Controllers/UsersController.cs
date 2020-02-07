@@ -85,6 +85,7 @@ namespace NewsAgregator.API.Controllers
             return Ok(_mapper.Map<IEnumerable<UserDto>>(usersFromRepo));
         }
 
+        [AllowAnonymous]
         [HttpGet("{userId}", Name = "GetUser")]
         public ActionResult<UserDto> GetUser(Guid userId)
         {
@@ -134,6 +135,7 @@ namespace NewsAgregator.API.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         //[Authorize(Roles = Role.Admin)]
         [HttpDelete("{userId}")]
         public ActionResult DeleteUser(Guid userId)

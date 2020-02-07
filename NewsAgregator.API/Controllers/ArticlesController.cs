@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -33,6 +34,7 @@ namespace NewsAgregator.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult<IEnumerable<ArticleDto>> GetArticlesForUser(Guid userId)
         {
@@ -46,6 +48,7 @@ namespace NewsAgregator.API.Controllers
             return Ok(_mapper.Map<IEnumerable<ArticleDto>>(articlesForUserFromRepo));
         }
 
+        [AllowAnonymous]
         [HttpGet("{articleId}", Name = "GetArticleForUser")]
         public ActionResult<ArticleDto> GetArticleForUser(Guid userId, Guid articleId)
         {
@@ -64,7 +67,7 @@ namespace NewsAgregator.API.Controllers
             return Ok(_mapper.Map<ArticleDto>(articleFromRepo));
         }
 
-
+        [AllowAnonymous]
         [HttpPost("{tagId}")]
         public ActionResult<ArticleDto> CreateArticleForUser(Guid userId, ArticleForCreationDto article, Guid tagId )
         {
@@ -84,6 +87,7 @@ namespace NewsAgregator.API.Controllers
                 articleToReturn);
         }
 
+        [AllowAnonymous]
         [HttpPut("{articleId}")]
         public IActionResult UpdateArticleForUser(Guid userId,
             Guid articleId,
@@ -121,6 +125,7 @@ namespace NewsAgregator.API.Controllers
             return NoContent();
         }
 
+        [AllowAnonymous]
         [HttpPatch("{articleId}")]
         public IActionResult PartiallyUpdateArticleForUser(Guid userId,
             Guid articleId,
@@ -175,6 +180,7 @@ namespace NewsAgregator.API.Controllers
             return NoContent();
         }
 
+        [AllowAnonymous]
         [HttpDelete("{articleId}")]
         public ActionResult DeleteArticleForUser(Guid userId, Guid articleId)
         {

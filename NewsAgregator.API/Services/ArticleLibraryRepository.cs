@@ -25,6 +25,12 @@ namespace NewsAgregator.API.Services
         private readonly IPropertyMappingService _propertyMappingService;
         //private readonly AppSettings _appSettings;
 
+            /// <summary>
+            /// Constructor sets the values required in class
+            /// </summary>
+            /// <param name="context"></param>
+            /// <param name="jwtAuthentication"></param>
+            /// <param name="propertyMappingService"></param>
         public ArticleLibraryRepository(CourseLibraryContext context, IOptions<JwtAuthentication> jwtAuthentication, IPropertyMappingService propertyMappingService/*, IOptions<AppSettings> appSettings*/)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -36,6 +42,13 @@ namespace NewsAgregator.API.Services
             //_appSettings = appSettings.Value ??
             //    throw new ArgumentNullException(nameof(appSettings));
         }
+
+        /// <summary>
+        /// Adds an article to the database
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="article"></param>
+        /// <param name="tagId"></param>
         public void AddArticle(Guid userId, Article article, Guid tagId)
         {
             if (userId == Guid.Empty || tagId == Guid.Empty)
